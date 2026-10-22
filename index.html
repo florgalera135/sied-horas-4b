@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Horas asincrónicas SIED · 4.º bimestre</title>
+<meta name="description" content="Cumplimiento de horas asincrónicas del SIED: horas exigidas por el SAG contra el trabajo registrado en el campus.">
+<!-- El tablero nombra personas: se pide a los buscadores que no lo indexen.
+     Quien tenga el enlace lo ve igual. Para que aparezca en Google, borrar esta línea. -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23025EE4'/><rect x='22' y='52' width='13' height='28' rx='3' fill='white'/><rect x='43' y='34' width='13' height='46' rx='3' fill='white'/><rect x='64' y='20' width='13' height='60' rx='3' fill='white'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6FA; --card:#FFFFFF; --ink:#1A1F2B; --mute:#5F6878; --line:#E3E7EE;
+  --pri:#025EE4; --pri2:#BFD6FA; --head:#0F5FDB; --dig:#0B2E6B;
+  --warn:#C9811A; --bad:#C8352B; --ok:#2E8B57; --track:#EDF1F7;
+  --sombra:0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.04);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10151D; --card:#171E29; --ink:#E7ECF2; --mute:#9AA7B8; --line:#2A3544;
+  --pri:#4D8DF5; --pri2:#1E3D6E; --head:#7FB0FF; --dig:#A9C4F5;
+  --warn:#E6A640; --bad:#E26B55; --ok:#4DB27A; --track:#222C3A;
+  --sombra:0 1px 3px rgba(0,0,0,.4);
+}}
+:root[data-theme="dark"]{
+  --bg:#10151D; --card:#171E29; --ink:#E7ECF2; --mute:#9AA7B8; --line:#2A3544;
+  --pri:#4D8DF5; --pri2:#1E3D6E; --head:#7FB0FF; --dig:#A9C4F5;
+  --warn:#E6A640; --bad:#E26B55; --ok:#4DB27A; --track:#222C3A;
+  --sombra:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.tb{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+
+/* ── encabezado ─────────────────────────────────────────── */
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
+header.top h1{font-size:1.6rem;margin:0;font-weight:700;color:var(--head);letter-spacing:-.01em}
+header.top p{margin:3px 0 0;color:var(--mute);font-size:.88rem}
+.tema{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--card);
+  color:var(--mute);padding:6px 13px;border-radius:99px;cursor:pointer;transition:.18s}
+.tema:hover{border-color:var(--pri);color:var(--pri)}
+
+/* ── filtros ────────────────────────────────────────────── */
+.filtros{position:sticky;top:0;z-index:30;background:var(--bg);
+  padding:10px 0 12px;margin-bottom:4px;border-bottom:1px solid transparent;transition:.2s}
+.filtros.pegado{border-bottom-color:var(--line);box-shadow:0 4px 12px -8px rgba(16,24,40,.35)}
+.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;align-items:end}
+.campo{min-width:0}
+.campo label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--mute);font-weight:600;margin-bottom:3px}
+.campo select{width:100%;font:inherit;font-size:.86rem;padding:7px 10px;border-radius:8px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;
+  transition:.15s;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%235F6878' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.campo select:hover{border-color:var(--pri)}
+.campo select:focus-visible{outline:2px solid var(--pri);outline-offset:1px}
+.limpiar{font:inherit;font-size:.84rem;border:1px solid var(--line);background:var(--card);
+  color:var(--mute);padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:.15s}
+.limpiar:hover:not(:disabled){border-color:var(--bad);color:var(--bad)}
+.limpiar:disabled{opacity:.45;cursor:default}
+.resumenf{margin:8px 0 0;font-size:.82rem;color:var(--mute)}
+.resumenf b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ── bloques ────────────────────────────────────────────── */
+h2.sec{font-size:1.1rem;margin:28px 0 4px;font-weight:700;color:var(--head);
+  padding-left:11px;border-left:4px solid var(--pri)}
+p.secsub{margin:0 0 11px;color:var(--mute);font-size:.84rem;max-width:72ch}
+.box{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;margin-bottom:12px;box-shadow:var(--sombra);min-width:0}
+.box h3{font-size:1rem;margin:0 0 2px;font-weight:600}
+.box .sub{color:var(--mute);font-size:.82rem;margin:0 0 14px}
+
+/* ── kpis ───────────────────────────────────────────────── */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:14px 16px;box-shadow:var(--sombra);position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--pri);
+  transform:scaleY(0);transform-origin:top;animation:crece .5s .1s cubic-bezier(.4,0,.2,1) forwards}
+.kpi.sag::before{background:var(--ok)} .kpi.mdl::before{background:var(--pri)}
+.kpi.pnd::before{background:var(--warn)} .kpi.asg::before{background:var(--mute)}
+@keyframes crece{to{transform:scaleY(1)}}
+.kpi b{display:block;font-size:1.9rem;line-height:1.1;font-variant-numeric:tabular-nums;font-weight:700}
+.kpi.sag b{color:var(--ok)} .kpi.mdl b{color:var(--pri)} .kpi.pnd b{color:var(--warn)}
+.kpi span{color:var(--mute);font-size:.84rem;display:block;margin-top:1px}
+.kpi small{display:block;color:var(--mute);font-size:.75rem;margin-top:4px;line-height:1.35}
+
+/* ── barras ─────────────────────────────────────────────── */
+.leg{display:flex;gap:18px;flex-wrap:wrap;font-size:.82rem;color:var(--mute);margin:0 0 14px}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.cmp .r{padding:10px 0;border-bottom:1px solid var(--line)}
+.cmp .r:last-child{border-bottom:0}
+.cmp .t{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+.cmp .t b{font-weight:600;font-size:.91rem}
+.cmp .t em{font-style:normal;color:var(--mute);font-size:.78rem;font-variant-numeric:tabular-nums}
+.trk{height:11px;background:var(--track);border-radius:6px;overflow:hidden;margin-bottom:4px}
+.trk i{display:block;height:100%;border-radius:6px;width:0;
+  transition:width .7s cubic-bezier(.4,0,.2,1)}
+.lbl{display:flex;justify-content:space-between;font-size:.76rem;color:var(--mute);font-variant-numeric:tabular-nums}
+
+/* ── tablas ─────────────────────────────────────────────── */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.87rem;min-width:680px}
+th{text-align:left;font-weight:600;color:var(--mute);font-size:.75rem;padding:7px 9px;
+  border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;background:var(--card)}
+th.orden{cursor:pointer;user-select:none;transition:color .15s}
+th.orden:hover{color:var(--pri)}
+th.orden::after{content:"";opacity:.35;margin-left:4px}
+th.orden[data-dir="asc"]::after{content:"▲";opacity:1;color:var(--pri)}
+th.orden[data-dir="desc"]::after{content:"▼";opacity:1;color:var(--pri)}
+td{padding:9px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th.n,td.n{text-align:right}
+tbody tr{transition:background .12s}
+tbody tr:hover td{background:var(--track)}
+tr.tot td{font-weight:700;border-bottom:0;border-top:2px solid var(--line);background:transparent}
+tr.sub td{border-top:0;color:var(--mute);background:var(--track);font-size:.83rem}
+tr.doc{cursor:pointer}
+.flecha{display:inline-block;width:12px;transition:transform .2s;color:var(--mute)}
+tr.doc.abierto .flecha{transform:rotate(90deg)}
+.pill{display:inline-block;font-size:.71rem;padding:2px 9px;border-radius:99px;color:#fff;white-space:nowrap}
+.p-ok{background:var(--ok)} .p-pa{background:var(--warn)} .p-de{background:var(--bad)}
+.p-li,.p-sd{background:var(--mute)}
+
+/* ── varios ─────────────────────────────────────────────── */
+.nota{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--warn);
+  border-radius:10px;padding:12px 15px;margin:12px 0;font-size:.86rem;box-shadow:var(--sombra)}
+.nota b{color:var(--warn)}
+.vacio{color:var(--mute);font-size:.88rem;padding:18px 0;text-align:center}
+.alerta{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line)}
+.alerta:last-of-type{border-bottom:0}
+.alerta b{font-variant-numeric:tabular-nums;font-size:1.05rem}
+.alerta em{display:block;font-style:normal;color:var(--mute);font-size:.78rem;margin-top:2px}
+footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:var(--mute);font-size:.8rem}
+footer dt{font-weight:600;color:var(--ink);margin-top:10px;font-size:.82rem}
+footer dd{margin:2px 0 0;max-width:80ch}
+.bajar{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--card);
+  color:var(--mute);padding:6px 13px;border-radius:8px;cursor:pointer;transition:.15s}
+.bajar:hover{border-color:var(--pri);color:var(--pri)}
+.cab{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+@media(max-width:980px){.fgrid{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.fgrid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr}
+  .tb{padding:14px 16px 30px}header.top h1{font-size:1.3rem}.filtros{position:static}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body>
+<div class="tb">
+
+<header class="top">
+  <div>
+    <h1>Horas asincrónicas SIED · 4.º bimestre</h1>
+    <p id="sub"></p>
+  </div>
+  <button class="tema" id="tema" type="button">Modo oscuro</button>
+</header>
+
+<div class="filtros" id="filtros">
+  <div class="fgrid">
+    <div class="campo"><label for="fUni">Unidad académica</label><select id="fUni"></select></div>
+    <div class="campo"><label for="fCar">Carrera</label><select id="fCar"></select></div>
+    <div class="campo"><label for="fDoc">Docente</label><select id="fDoc"></select></div>
+    <div class="campo"><label for="fAul">Aula</label><select id="fAul"></select></div>
+    <button class="limpiar" id="limpiar" type="button" disabled>Limpiar</button>
+  </div>
+  <p class="resumenf" id="resumenf"></p>
+</div>
+
+<div class="kpis" id="kpis"></div>
+<div class="nota" id="nota"></div>
+
+<h2 class="sec">Por unidad académica</h2>
+<p class="secsub">Horas que el SAG exige contra las que el docente fichó en el SAG y las que efectivamente trabajó en el campus.</p>
+<div class="box">
+  <div class="leg">
+    <span><i style="background:var(--track);border:1px solid var(--line)"></i>Asignadas (SAG)</span>
+    <span><i style="background:var(--ok)"></i>Cumplidas en SAG</span>
+    <span><i style="background:var(--pri)"></i>Efectivas en Moodle</span>
+  </div>
+  <div class="cmp" id="cmpUni"></div>
+</div>
+
+<h2 class="sec">Por carrera</h2>
+<p class="secsub">El mismo cruce, abierto por carrera.</p>
+<div class="box"><div class="cmp" id="cmpCar"></div></div>
+
+<h2 class="sec">Por docente</h2>
+<p class="secsub">Hacé clic en un docente para ver cada una de sus aulas por separado. Las columnas con flecha ordenan.</p>
+<div class="box">
+  <div class="cab"><h3 style="margin:0">Cumplimiento docente</h3>
+    <button class="bajar" id="bajarDoc" type="button">Descargar CSV</button></div>
+  <div class="scroll"><table id="tDoc"></table></div>
+</div>
+
+<h2 class="sec">Aula por aula</h2>
+<p class="secsub">Detalle completo. Útil para buscar un caso puntual con los filtros de arriba.</p>
+<div class="box">
+  <div class="cab"><h3 style="margin:0">Detalle de aulas</h3>
+    <button class="bajar" id="bajarAul" type="button">Descargar CSV</button></div>
+  <div class="scroll"><table id="tAul"></table></div>
+</div>
+
+<h2 class="sec">Para revisar</h2>
+<p class="secsub">Casos que conviene mirar a mano antes de sacar conclusiones.</p>
+<div class="box"><div id="alertas"></div></div>
+
+<footer>
+  <strong>De dónde sale cada número</strong>
+  <dl id="fuentes"></dl>
+  <p id="pie" style="margin-top:14px"></p>
+</footer>
+</div>
+
+<script>
+const D = {"corte":"2026-10-20","bimestre":"4.º bimestre 2026","cobertura":{"desde":"2026-10-05","hasta":"2026-10-28"},"generado":"2026-10-22T07:45:23","tot":{"docentes":112,"aulas":137,"eventos":1056,"hs_asignadas_sag":1201.7,"hs_cumplidas_sag":1012.0,"hs_moodle":842.2,"hs_trabajo":406.0,"hs_navegacion":435.7,"eventos_cumplidos":577,"eventos_parciales":18,"eventos_sin_salida":15,"eventos_sin_registro":103,"eventos_pendientes":343,"hs_pendientes":575.7,"hs_programadas_total":1777.6,"aulas_en_licencia":1,"docentes_en_licencia":1,"aulas_solo_sag":3},"aulas":[{"doc":"Aguirre, Daiana","aula":"Psicología General I - E","asig":"Psicología General I","com":"E","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":24.0,"sag":21.0,"mdl":9.2,"trb":2.9,"nav":6.2,"pnd":9.0,"dia":10,"cum":7,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Ale, Carlos Alberto","aula":"NEUROCIENCIAS I - D","asig":"NEUROCIENCIAS I","com":"D","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":21.0,"sag":21.0,"mdl":14.5,"trb":8.6,"nav":5.9,"pnd":12.0,"dia":17,"cum":7,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Alegre, Silvia Susana","aula":"Derecho Civil y Comercial - A","asig":"Derecho Civil y Comercial","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":8,"asg":7.0,"sag":7.0,"mdl":8.7,"trb":5.3,"nav":3.3,"pnd":4.0,"dia":15,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Alvarenga, Lucas Emanuel","aula":"Régimen tributario para administradores - A","asig":"Régimen tributario para administradores","com":"A","car":"Licenciatura en Administración de Empresas","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":5.0,"sag":5.0,"mdl":4.9,"trb":2.0,"nav":2.9,"pnd":2.0,"dia":11,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"aproximado"},{"doc":"Arcángeli Arias, Mara Cecilia","aula":"Fundamentos de Filosofía - F","asig":"Fundamentos de Filosofía","com":"F","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":12.0,"sag":11.2,"mdl":9.6,"trb":5.2,"nav":4.3,"pnd":6.5,"dia":15,"cum":6,"par":1,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Ayala, Andrés Roberto","aula":"Comercialización I - A","asig":"Comercialización I","com":"A","car":"Licenciatura en Administración de Empresas","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":6,"asg":4.0,"sag":2.0,"mdl":1.7,"trb":0.3,"nav":1.3,"pnd":2.0,"dia":3,"cum":2,"par":0,"ss":0,"sr":2,"niv":"Parcial","mch":"exacto"},{"doc":"Basualdo , María Gabriela","aula":"Taller de aproximación a las orientaciones - A","asig":"Taller de aproximación a las orientaciones","com":"A","car":"Licenciatura en Administración de Empresas","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":8,"asg":5.0,"sag":3.9,"mdl":3.8,"trb":2.2,"nav":1.7,"pnd":3.0,"dia":8,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Benedetich, María Florencia","aula":"Estadística - A","asig":"Estadística","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":7.5,"sag":7.5,"mdl":14.5,"trb":10.3,"nav":4.2,"pnd":3.0,"dia":8,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Benitez, Susana Emilia","aula":"Psicología General I - F","asig":"Psicología General I","com":"F","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":13.5,"sag":11.5,"mdl":11.0,"trb":3.0,"nav":8.0,"pnd":5.0,"dia":14,"cum":7,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Benítez , María Fátima","aula":"LA INTERVENCIÓN DEL ACOMPAÑANTE TERAPÉUTICO - A","asig":"LA INTERVENCIÓN DEL ACOMPAÑANTE TERAPÉUTICO","com":"A","car":"Tecnicatura Universitaria en Acompañamiento Terapéutico","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":5,"asg":4.0,"sag":3.0,"mdl":3.9,"trb":1.2,"nav":2.8,"pnd":1.0,"dia":11,"cum":3,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Benítez , María Fátima","aula":"Ámbitos de Intervención-Nuevos Escenarios en Acompañamiento Terapéutico - A","asig":"Ámbitos de Intervención-Nuevos Escenarios en Acompañamiento Terapéutico","com":"A","car":"Tecnicatura Universitaria en Acompañamiento Terapéutico","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":5,"asg":4.0,"sag":3.0,"mdl":3.5,"trb":1.2,"nav":2.3,"pnd":1.0,"dia":10,"cum":3,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"aproximado"},{"doc":"Bercheñi, Viviana","aula":"Formulación y Administración de Proyectos - A","asig":"Formulación y Administración de Proyectos","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":8,"asg":5.0,"sag":4.0,"mdl":4.0,"trb":2.5,"nav":1.5,"pnd":3.0,"dia":7,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Bercheñi, Viviana","aula":"Macroeconomía - A","asig":"Macroeconomía","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":6.5,"sag":6.5,"mdl":4.1,"trb":2.6,"nav":1.5,"pnd":2.5,"dia":9,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Bercheñi, Viviana","aula":"Matemática Financiera - A","asig":"Matemática Financiera","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":6.0,"sag":6.0,"mdl":4.1,"trb":1.9,"nav":2.2,"pnd":4.5,"dia":7,"cum":4,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Berta, Mario Bernardino","aula":"NEUROCIENCIAS I - A","asig":"NEUROCIENCIAS I","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":4,"asg":4.0,"sag":4.0,"mdl":4.2,"trb":0.3,"nav":3.9,"pnd":4.0,"dia":19,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Bertrán, Andrea Elizabeth","aula":"ÉTICA PROFESIONAL - A","asig":"ÉTICA PROFESIONAL","com":"A","car":"Licenciatura en Ciencias de la Educación - Ciclo de Licenciatura","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":5.0,"sag":5.0,"mdl":7.0,"trb":2.2,"nav":4.8,"pnd":2.0,"dia":11,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Bittar, María Cristina","aula":"Psicología General I - B","asig":"Psicología General I","com":"B","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":24.0,"sag":21.0,"mdl":16.0,"trb":8.0,"nav":8.0,"pnd":9.0,"dia":14,"cum":7,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Boonman, Vanessa Jenny Andrea","aula":"Derecho de las Obligaciones - A","asig":"Derecho de las Obligaciones","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":7,"asg":5.0,"sag":5.0,"mdl":3.1,"trb":1.8,"nav":1.2,"pnd":4.0,"dia":8,"cum":4,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Brito, Rita Paola","aula":"PSICOLOGÍA SOCIAL Y COMUNITARIA - P","asig":"PSICOLOGÍA SOCIAL Y COMUNITARIA","com":"P","car":"Tecnicatura Universitaria en Acompañamiento Terapéutico","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":7,"asg":5.0,"sag":5.0,"mdl":5.3,"trb":3.2,"nav":2.2,"pnd":3.8,"dia":9,"cum":4,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Brito, Rita Paola","aula":"SALUD PÚBLICA - A","asig":"SALUD PÚBLICA","com":"A","car":"Tecnicatura Universitaria en Acompañamiento Terapéutico","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":7,"asg":5.0,"sag":3.6,"mdl":5.7,"trb":3.1,"nav":2.6,"pnd":3.8,"dia":7,"cum":3,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Brunelli, Hernando Javier","aula":"Instituciones del Derecho Privado II - A","asig":"Instituciones del Derecho Privado II","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":6.0,"sag":5.0,"mdl":1.3,"trb":0.8,"nav":0.5,"pnd":4.0,"dia":3,"cum":3,"par":0,"ss":0,"sr":1,"niv":"Pendiente","mch":"exacto"},{"doc":"Burns, María Florencia","aula":"Contabilidad II - A","asig":"Contabilidad II","com":"A","car":"Licenciatura en Administración de Empresas","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":6,"asg":6.0,"sag":6.0,"mdl":7.1,"trb":2.6,"nav":4.5,"pnd":3.0,"dia":11,"cum":4,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Burns, María Florencia","aula":"Investigación Operativa - A","asig":"Investigación Operativa","com":"A","car":"Licenciatura en Administración de Empresas","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":8,"asg":5.0,"sag":4.0,"mdl":4.4,"trb":1.8,"nav":2.7,"pnd":3.0,"dia":11,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Cabrera, Eladia Beatriz","aula":"ANTROPOLOGÍA CULTURAL - C","asig":"ANTROPOLOGÍA CULTURAL","com":"C","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":21.0,"sag":21.0,"mdl":13.2,"trb":6.8,"nav":6.4,"pnd":12.0,"dia":10,"cum":7,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Campodonico, Nicolas","aula":"Taller de Trabajo Integrador Final de la Carrera I - A","asig":"Taller de Trabajo Integrador Final de la Carrera I","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":6.0,"sag":5.8,"mdl":2.9,"trb":1.4,"nav":1.5,"pnd":4.5,"dia":15,"cum":4,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Campodonico, Nicolas","aula":"Teoría Psicoanalítica I - A","asig":"Teoría Psicoanalítica I","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":9.5,"sag":9.5,"mdl":1.0,"trb":0.7,"nav":0.3,"pnd":5.0,"dia":5,"cum":7,"par":0,"ss":0,"sr":0,"niv":"Pendiente","mch":"exacto"},{"doc":"Cappello, Héctor Andrés","aula":"Geografía Económica Mundial - A","asig":"Geografía Económica Mundial","com":"A","car":"Licenciatura en Comercio Internacional","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":4,"asg":6.0,"sag":4.0,"mdl":6.9,"trb":2.2,"nav":4.7,"pnd":2.0,"dia":7,"cum":2,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Castro Schweizer, Esperanza","aula":"ENTORNOS VIRTUALES DE APRENDIZAJE UNIVERSITARIO II - A","asig":"ENTORNOS VIRTUALES DE APRENDIZAJE UNIVERSITARIO II","com":"A","car":"Profesorado Universitario - Ciclo de Profesorado","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":5.0,"sag":5.0,"mdl":12.1,"trb":5.6,"nav":6.5,"pnd":4.0,"dia":12,"cum":4,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Centurión, María Dolores","aula":"Comportamiento en las Organizaciones y Liderazgo - A","asig":"Comportamiento en las Organizaciones y Liderazgo","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":6,"asg":5.0,"sag":3.5,"mdl":5.9,"trb":1.5,"nav":4.4,"pnd":2.5,"dia":11,"cum":3,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Chigal, Laura Milene","aula":"Psicología General II - A","asig":"Psicología General II","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":12.5,"sag":10.0,"mdl":6.7,"trb":1.8,"nav":4.8,"pnd":5.0,"dia":9,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Ciocca, María Angélica","aula":"Introducción a la Comercialización - A","asig":"Introducción a la Comercialización","com":"A","car":"Licenciatura en Comercio Internacional","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":3,"asg":4.0,"sag":4.0,"mdl":6.1,"trb":2.8,"nav":3.2,"pnd":2.0,"dia":8,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Cordes, Pablo Andres","aula":"Psicología General II - C","asig":"Psicología General II","com":"C","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":24.0,"sag":21.0,"mdl":3.5,"trb":1.7,"nav":1.8,"pnd":9.0,"dia":10,"cum":7,"par":0,"ss":0,"sr":1,"niv":"Pendiente","mch":"exacto"},{"doc":"Cordes, Pablo Andres","aula":"Teoría Psicoanalítica I - B","asig":"Teoría Psicoanalítica I","com":"B","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":10.0,"sag":10.0,"mdl":2.3,"trb":0.9,"nav":1.4,"pnd":7.0,"dia":10,"cum":7,"par":0,"ss":0,"sr":0,"niv":"Pendiente","mch":"exacto"},{"doc":"Custidiano, Nicolás","aula":"Administración Financiera - A","asig":"Administración Financiera","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":8,"asg":5.0,"sag":4.0,"mdl":3.8,"trb":2.2,"nav":1.5,"pnd":3.0,"dia":7,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"DUARTE, BENITO DAVID","aula":"Clínica Psicopedagógica en Adultos y Adultos Mayores I - A","asig":"Clínica Psicopedagógica en Adultos y Adultos Mayores I","com":"A","car":"Licenciatura en Psicopedagogía - Ciclo de Licenciatura","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":6.0,"sag":6.0,"mdl":12.2,"trb":4.7,"nav":7.5,"pnd":2.5,"dia":16,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Diambra, Adrian","aula":"PSICOFARMACOLOGÍA - A","asig":"PSICOFARMACOLOGÍA","com":"A","car":"Tecnicatura Universitaria en Acompañamiento Terapéutico","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":7,"asg":6.2,"sag":3.8,"mdl":5.7,"trb":3.3,"nav":2.3,"pnd":2.5,"dia":9,"cum":3,"par":0,"ss":0,"sr":2,"niv":"Cumple","mch":"exacto"},{"doc":"Diaz, Natalia","aula":"Contabilidad para Administradores - A","asig":"Contabilidad para Administradores","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":4.0,"sag":3.0,"mdl":2.2,"trb":0.8,"nav":1.3,"pnd":3.0,"dia":9,"cum":3,"par":0,"ss":1,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Diaz, Natalia","aula":"Costos - A","asig":"Costos","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":8,"asg":6.0,"sag":6.0,"mdl":3.4,"trb":0.9,"nav":2.5,"pnd":4.0,"dia":12,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Enriquez Gonzalez, Ramiro","aula":"Concursos, Quiebras y Actuación Pericial - A","asig":"Concursos, Quiebras y Actuación Pericial","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":3,"asg":4.0,"sag":4.0,"mdl":4.1,"trb":1.5,"nav":2.6,"pnd":2.0,"dia":10,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Enriquez Gonzalez, Ramiro","aula":"Contabilidad III - A","asig":"Contabilidad III","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":4,"asg":6.0,"sag":4.0,"mdl":6.2,"trb":3.6,"nav":2.7,"pnd":2.0,"dia":10,"cum":2,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Esquivel, Luis Alberto","aula":"NEUROCIENCIAS - A","asig":"NEUROCIENCIAS","com":"A","car":"Tecnicatura Universitaria en Acompañamiento Terapéutico","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":7,"asg":4.8,"sag":3.0,"mdl":14.4,"trb":5.4,"nav":9.0,"pnd":1.0,"dia":16,"cum":3,"par":0,"ss":2,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Fernandez, Patricia Beatriz","aula":"Impuestos I - A","asig":"Impuestos I","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":6.0,"sag":5.0,"mdl":5.8,"trb":1.9,"nav":3.8,"pnd":2.5,"dia":16,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Fernandez, Patricia Beatriz","aula":"Impuestos III - A","asig":"Impuestos III","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":5.0,"sag":5.0,"mdl":2.9,"trb":1.1,"nav":1.8,"pnd":2.0,"dia":7,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Ferragud, Maria Laura","aula":"Derecho Público Provincial y Municipal - A","asig":"Derecho Público Provincial y Municipal","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":3,"asg":4.0,"sag":4.0,"mdl":7.0,"trb":2.6,"nav":4.4,"pnd":2.0,"dia":15,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Ferrari, Jael Loana","aula":"Sociología - A","asig":"Sociología","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":12,"asg":11.5,"sag":8.0,"mdl":3.6,"trb":1.6,"nav":2.0,"pnd":4.0,"dia":7,"cum":6,"par":0,"ss":0,"sr":3,"niv":"Parcial","mch":"exacto"},{"doc":"Flores Gomez, Lucía Milagros","aula":"Derecho Civil y Comercial - B","asig":"Derecho Civil y Comercial","com":"B","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":11,"asg":12.0,"sag":10.0,"mdl":8.9,"trb":4.9,"nav":4.0,"pnd":4.5,"dia":17,"cum":7,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Flores, Emilia Inés","aula":"Derecho Notarial II - B","asig":"Derecho Notarial II","com":"B","car":"Escribanía - Ciclo de Complementación Curricular","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":12,"asg":12.5,"sag":9.5,"mdl":10.5,"trb":7.5,"nav":3.0,"pnd":5.5,"dia":16,"cum":6,"par":0,"ss":0,"sr":2,"niv":"Parcial","mch":"exacto"},{"doc":"Flores, Emilia Inés","aula":"Práctica Profesional Notarial - C","asig":"Práctica Profesional Notarial","com":"C","car":"Escribanía - Ciclo de Complementación Curricular","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":11,"asg":11.5,"sag":8.0,"mdl":5.3,"trb":2.6,"nav":2.8,"pnd":7.0,"dia":15,"cum":5,"par":0,"ss":0,"sr":2,"niv":"Parcial","mch":"exacto"},{"doc":"Gallicet, Liliana María","aula":"Derecho Notarial II - A","asig":"Derecho Notarial II","com":"A","car":"Escribanía - Ciclo de Complementación Curricular","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":8,"asg":7.5,"sag":7.2,"mdl":6.3,"trb":3.7,"nav":2.7,"pnd":4.5,"dia":10,"cum":4,"par":1,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Galván Zampedri, Natalia","aula":"Teoría y Derechos Constitucionales - A","asig":"Teoría y Derechos Constitucionales","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":7,"asg":6.0,"sag":6.0,"mdl":9.8,"trb":2.9,"nav":6.8,"pnd":4.5,"dia":18,"cum":4,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Garcia Veritá, Gonzalo Leandro","aula":"Derecho Penal General (Parte II) - A","asig":"Derecho Penal General (Parte II)","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":7,"asg":6.5,"sag":4.0,"mdl":5.7,"trb":2.6,"nav":3.1,"pnd":2.5,"dia":14,"cum":3,"par":0,"ss":0,"sr":2,"niv":"Parcial","mch":"exacto"},{"doc":"Gatto D`Andrea, María Alejandra","aula":"ANTROPOLOGÍA CULTURAL - B","asig":"ANTROPOLOGÍA CULTURAL","com":"B","car":"Licenciatura en Acompañamiento Terapéutico-Ciclo de Complementación Curricular-","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":11,"asg":21.0,"sag":14.3,"mdl":5.6,"trb":3.4,"nav":2.2,"pnd":12.0,"dia":14,"cum":4,"par":1,"ss":1,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Ghiglione, María Eva","aula":"Psicología Evolutiva Niñez - A","asig":"Psicología Evolutiva Niñez","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":4,"asg":3.0,"sag":2.0,"mdl":3.1,"trb":1.7,"nav":1.4,"pnd":1.0,"dia":6,"cum":2,"par":0,"ss":1,"sr":0,"niv":"Pendiente (solo SAG)","mch":"exacto"},{"doc":"Ghiglione, María Eva","aula":"Psicología del Desarrollo del Niño - A","asig":"Psicología del Desarrollo del Niño","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":3,"asg":4.0,"sag":4.0,"mdl":2.2,"trb":0.9,"nav":1.2,"pnd":2.0,"dia":5,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Cumple (solo SAG)","mch":"exacto"},{"doc":"Giardina, Sandra Alida","aula":"Comercialización I - A","asig":"Comercialización I","com":"A","car":"Licenciatura en Administración de Empresas","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":6,"asg":4.0,"sag":2.0,"mdl":5.1,"trb":1.8,"nav":3.2,"pnd":2.0,"dia":11,"cum":2,"par":0,"ss":0,"sr":2,"niv":"Cumple","mch":"exacto"},{"doc":"Gimenez, María Mercedes","aula":"DESARROLLOS EN PSICOLOGÍA GENÉTICA - A","asig":"DESARROLLOS EN PSICOLOGÍA GENÉTICA","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":4,"asg":6.0,"sag":6.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":2.0,"dia":0,"cum":3,"par":0,"ss":0,"sr":0,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Gonzalez Muñoz, Graciela","aula":"Costos - A","asig":"Costos","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":12,"asg":8.0,"sag":0.0,"mdl":0.1,"trb":0.0,"nav":0.1,"pnd":4.0,"dia":1,"cum":0,"par":0,"ss":0,"sr":8,"niv":"Pendiente","mch":"exacto"},{"doc":"Gonzalez, Patricia Alejandra","aula":"Taller de Informática Contable - A","asig":"Taller de Informática Contable","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":5.0,"sag":4.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":2.0,"dia":0,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Gonzalvez, José","aula":"PSICOPATOLOGÍA II - A","asig":"PSICOPATOLOGÍA II","com":"A","car":"Tecnicatura Universitaria en Acompañamiento Terapéutico","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":7,"asg":6.0,"sag":6.0,"mdl":8.0,"trb":4.3,"nav":3.7,"pnd":2.5,"dia":12,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Gonzalvez, José","aula":"Práctica Profesional - B","asig":"Práctica Profesional","com":"B","car":"Tecnicatura Universitaria en Acompañamiento Terapéutico","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":11,"asg":16.0,"sag":13.5,"mdl":7.8,"trb":3.1,"nav":4.7,"pnd":6.0,"dia":18,"cum":7,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Gronda, Lidia Ulimar","aula":"Practica Profesional Supervisada. - A","asig":"Practica Profesional Supervisada.","com":"A","car":"Licenciatura en Ciencias de la Educación - Ciclo de Licenciatura","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":7.5,"sag":5.7,"mdl":9.0,"trb":4.0,"nav":5.0,"pnd":3.0,"dia":14,"cum":3,"par":1,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Guardiola, Carolina","aula":"Taller de Práctica Profesional de Asesoría de Empresas - A","asig":"Taller de Práctica Profesional de Asesoría de Empresas","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":4,"asg":6.0,"sag":6.0,"mdl":7.1,"trb":3.8,"nav":3.3,"pnd":2.0,"dia":8,"cum":3,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Gutierrez, Ethel Lorena","aula":"Portugués - B","asig":"Portugués","com":"B","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":21.0,"sag":21.0,"mdl":10.8,"trb":5.3,"nav":5.5,"pnd":12.0,"dia":11,"cum":7,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Gálvez, Gabriela María","aula":"Clínica Psicopedagógica en Niños y Adolescentes II - A","asig":"Clínica Psicopedagógica en Niños y Adolescentes II","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":5.0,"sag":4.9,"mdl":3.0,"trb":0.8,"nav":2.2,"pnd":3.8,"dia":4,"cum":4,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Gómez, Federico","aula":"Taller de Trabajo Integrador Final de Carrera II - B","asig":"Taller de Trabajo Integrador Final de Carrera II","com":"B","car":"Licenciatura en Acompañamiento Terapéutico-Ciclo de Complementación Curricular-","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":7,"asg":7.0,"sag":5.8,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":3.0,"dia":0,"cum":3,"par":2,"ss":0,"sr":0,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Jara, Juan Emiliano","aula":"TICs para la Gestión Organizacional - A","asig":"TICs para la Gestión Organizacional","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":5.0,"sag":3.8,"mdl":3.0,"trb":0.9,"nav":2.1,"pnd":2.0,"dia":9,"cum":3,"par":2,"ss":0,"sr":0,"niv":"Pendiente (solo SAG)","mch":"exacto"},{"doc":"Jimenez Morales, Rodneys Mauricio","aula":"Neurocognición y Aprendizaje - A","asig":"Neurocognición y Aprendizaje","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":7.5,"sag":7.5,"mdl":8.2,"trb":6.0,"nav":2.2,"pnd":3.0,"dia":9,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Judith, Taragano","aula":"Inglés - A","asig":"Inglés","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":4,"asg":2.0,"sag":2.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":2.0,"dia":0,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Sin dato de Moodle","mch":"docente no está en Moodle"},{"doc":"LLanderal, Claudia Vanessa","aula":"Inglés - A","asig":"Inglés","com":"A","car":"Licenciatura en Administración de Empresas","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":5.0,"sag":4.0,"mdl":10.8,"trb":4.1,"nav":6.7,"pnd":2.0,"dia":12,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Leguiza, Claudio Adrián","aula":"Fundamentos de Filosofía - E","asig":"Fundamentos de Filosofía","com":"E","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":21.0,"sag":17.8,"mdl":6.1,"trb":3.8,"nav":2.3,"pnd":12.0,"dia":7,"cum":6,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Libano, Juan Bautista","aula":"Sociología - A","asig":"Sociología","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":4,"asg":7.5,"sag":4.4,"mdl":3.9,"trb":1.2,"nav":2.8,"pnd":2.5,"dia":11,"cum":1,"par":1,"ss":1,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Loizaga, Amalia Beatriz","aula":"PSICOLOGÍA DEL DESARROLLO II - A","asig":"PSICOLOGÍA DEL DESARROLLO II","com":"A","car":"Tecnicatura Universitaria en Acompañamiento Terapéutico","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":7,"asg":5.0,"sag":5.0,"mdl":4.5,"trb":2.4,"nav":2.1,"pnd":3.8,"dia":10,"cum":4,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Lopez Druzianich, Paula Natali","aula":"Práctica Profesional Notarial - B","asig":"Práctica Profesional Notarial","com":"B","car":"Escribanía - Ciclo de Complementación Curricular","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":12,"asg":13.0,"sag":10.0,"mdl":11.3,"trb":5.1,"nav":6.2,"pnd":7.0,"dia":22,"cum":6,"par":0,"ss":0,"sr":2,"niv":"Parcial","mch":"exacto"},{"doc":"Lorenzo, Luisella","aula":"Taller de Trabajo Integrador Final de la Carrera I - B","asig":"Taller de Trabajo Integrador Final de la Carrera I","com":"B","car":"Tecnicatura Universitaria en Acompañamiento Terapéutico","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":14,"asg":15.0,"sag":14.8,"mdl":7.8,"trb":3.6,"nav":4.2,"pnd":6.0,"dia":16,"cum":10,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"López Guanes, Jose Alberto","aula":"Derecho de los Usuarios y los Consumidores - A","asig":"Derecho de los Usuarios y los Consumidores","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":7,"asg":9.0,"sag":4.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":3.5,"dia":0,"cum":2,"par":0,"ss":1,"sr":2,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"López, Susana Regina","aula":"DIDÁCTICA III - A","asig":"DIDÁCTICA III","com":"A","car":"Profesorado Universitario - Ciclo de Profesorado","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":8,"asg":5.5,"sag":3.8,"mdl":4.3,"trb":2.0,"nav":2.3,"pnd":2.5,"dia":11,"cum":4,"par":0,"ss":1,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"MAGLIONE, ALEJANDRA","aula":"Psicología Evolutiva Niñez - B","asig":"Psicología Evolutiva Niñez","com":"B","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":23.0,"sag":0.0,"mdl":8.9,"trb":5.7,"nav":3.2,"pnd":9.0,"dia":8,"cum":0,"par":0,"ss":0,"sr":8,"niv":"Parcial","mch":"exacto"},{"doc":"MAGLIONE, ALEJANDRA","aula":"Psicología General I - D","asig":"Psicología General I","com":"D","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":24.0,"sag":20.0,"mdl":9.8,"trb":6.0,"nav":3.8,"pnd":9.0,"dia":9,"cum":6,"par":1,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Macenchuk, Romina","aula":"Portugués - A","asig":"Portugués","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":12,"asg":20.0,"sag":17.5,"mdl":18.6,"trb":10.9,"nav":7.7,"pnd":10.0,"dia":24,"cum":7,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Martínez, Yago Nicolás","aula":"Fundamentos de Filosofía - A","asig":"Fundamentos de Filosofía","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":11.0,"sag":11.0,"mdl":6.2,"trb":2.3,"nav":3.8,"pnd":6.0,"dia":25,"cum":7,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Menghi, María Soledad","aula":"Psicología General I - C","asig":"Psicología General I","com":"C","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":24.0,"sag":20.9,"mdl":9.8,"trb":5.9,"nav":3.9,"pnd":9.0,"dia":12,"cum":7,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Naiquen Martina, Ghiani Echenique","aula":"ANTROPOLOGÍA CULTURAL - A","asig":"ANTROPOLOGÍA CULTURAL","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":12,"asg":15.0,"sag":13.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":6.0,"dia":0,"cum":6,"par":0,"ss":0,"sr":2,"niv":"Sin dato de Moodle","mch":"docente no está en Moodle"},{"doc":"Navarro, Cosme","aula":"Fundamentos de Filosofía - B","asig":"Fundamentos de Filosofía","com":"B","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":21.0,"sag":21.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":12.0,"dia":0,"cum":7,"par":0,"ss":0,"sr":0,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Oñate, Maria Emilia","aula":"Trabajo Integrador Final II - A","asig":"Trabajo Integrador Final II","com":"A","car":"Licenciatura en Psicopedagogía - Ciclo de Licenciatura","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":8,"asg":10.0,"sag":0.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":6.0,"dia":0,"cum":0,"par":0,"ss":0,"sr":5,"niv":"En licencia","mch":"docente no está en Moodle"},{"doc":"Parkinson, Christian Anibal","aula":"Programación IV - A","asig":"Programación IV","com":"A","car":"Tecnicatura Universitaria en Diseño y Programación de Videojuegos","uni":"Facultad de Ingeniería, Tecnología y Arquitectura","cat":"","ev":7,"asg":2.5,"sag":2.0,"mdl":2.2,"trb":0.4,"nav":1.8,"pnd":1.0,"dia":5,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Pereyra, Sergio Paulo","aula":"Derecho Penal Especial (Parte II) - A","asig":"Derecho Penal Especial (Parte II)","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":3,"asg":4.0,"sag":4.0,"mdl":3.7,"trb":0.7,"nav":3.0,"pnd":2.0,"dia":10,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Petric, Natalia","aula":"Psicopedagogía y Diversidad - A","asig":"Psicopedagogía y Diversidad","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":4,"asg":6.0,"sag":5.9,"mdl":1.2,"trb":0.5,"nav":0.7,"pnd":2.0,"dia":5,"cum":3,"par":0,"ss":0,"sr":0,"niv":"Pendiente","mch":"exacto"},{"doc":"Petric, Natalia","aula":"Taller de Trabajo Integrador Final de Carrera II - A","asig":"Taller de Trabajo Integrador Final de Carrera II","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":10.0,"sag":10.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":4.0,"dia":0,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Picolini, Patricia","aula":"Estrategias y Modelos de Negocios - A","asig":"Estrategias y Modelos de Negocios","com":"A","car":"Tecnicatura Universitaria en Diseño y Programación de Videojuegos","uni":"Facultad de Ingeniería, Tecnología y Arquitectura","cat":"","ev":4,"asg":3.0,"sag":2.0,"mdl":4.2,"trb":1.8,"nav":2.4,"pnd":1.0,"dia":9,"cum":2,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Piñeyro, Marcelo","aula":"NEUROCIENCIAS I - B","asig":"NEUROCIENCIAS I","com":"B","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":21.0,"sag":21.0,"mdl":9.2,"trb":5.5,"nav":3.7,"pnd":12.0,"dia":15,"cum":7,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Poberezny, Sebastián Alberto","aula":"Guión y Diseño de Videojuegos I - A","asig":"Guión y Diseño de Videojuegos I","com":"A","car":"Tecnicatura Universitaria en Diseño y Programación de Videojuegos","uni":"Facultad de Ingeniería, Tecnología y Arquitectura","cat":"","ev":4,"asg":3.0,"sag":2.0,"mdl":3.5,"trb":1.8,"nav":1.8,"pnd":1.0,"dia":9,"cum":2,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Pozzer, Gerardo Adrián","aula":"Política y Derecho - A","asig":"Política y Derecho","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":4,"asg":6.0,"sag":4.0,"mdl":4.7,"trb":2.2,"nav":2.5,"pnd":2.0,"dia":8,"cum":2,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Puglieso, Marcelo Sergio","aula":"Simulación - A","asig":"Simulación","com":"A","car":"Tecnicatura Universitaria en Diseño y Programación de Videojuegos","uni":"Facultad de Ingeniería, Tecnología y Arquitectura","cat":"","ev":4,"asg":2.0,"sag":1.0,"mdl":1.9,"trb":0.8,"nav":1.1,"pnd":2.0,"dia":3,"cum":1,"par":1,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Quiñonez, Jose Silvio","aula":"Taller de Práctica Profesional de la Abogacía del Estado - A","asig":"Taller de Práctica Profesional de la Abogacía del Estado","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":3,"asg":4.0,"sag":4.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":2.0,"dia":0,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Radke, Leticia Liz","aula":"Derecho del Trabajo y la Seguridad Social - A","asig":"Derecho del Trabajo y la Seguridad Social","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":8,"asg":5.0,"sag":0.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":3.0,"dia":0,"cum":0,"par":0,"ss":0,"sr":5,"niv":"Sin dato de Moodle","mch":"docente no está en Moodle"},{"doc":"Reparaz, Maria Florencia Evelyn","aula":"PRÁCTICA PROFESIONAL - P","asig":"PRÁCTICA PROFESIONAL","com":"P","car":"Licenciatura en Acompañamiento Terapéutico-Ciclo de Complementación Curricular-","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":7,"asg":7.5,"sag":7.5,"mdl":27.5,"trb":9.8,"nav":17.7,"pnd":3.0,"dia":29,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Reparaz, Maria Florencia Evelyn","aula":"Práctica Profesional - A","asig":"Práctica Profesional","com":"A","car":"Licenciatura en Acompañamiento Terapéutico-Ciclo de Complementación Curricular-","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":7,"asg":7.5,"sag":7.5,"mdl":27.5,"trb":9.8,"nav":17.7,"pnd":3.0,"dia":29,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Repetto, Nicolas","aula":"Teoría y Derechos Constitucionales - A","asig":"Teoría y Derechos Constitucionales","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":2,"asg":3.0,"sag":3.0,"mdl":2.5,"trb":1.6,"nav":0.9,"pnd":0.0,"dia":3,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Rodriguez, Claudia Alejandra","aula":"Clínica Psicopedagógica en Adultos y Adultos Mayores I - A","asig":"Clínica Psicopedagógica en Adultos y Adultos Mayores I","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":6.0,"sag":5.8,"mdl":6.7,"trb":4.4,"nav":2.2,"pnd":2.5,"dia":11,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Rodriguez, Claudia Alejandra","aula":"Teorías del Aprendizaje - A","asig":"Teorías del Aprendizaje","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":7.5,"sag":7.4,"mdl":8.4,"trb":5.3,"nav":3.1,"pnd":3.0,"dia":10,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Roma, María Fernanda","aula":"Práctica Profesional Notarial - A","asig":"Práctica Profesional Notarial","com":"A","car":"Escribanía - Ciclo de Complementación Curricular","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":7,"asg":7.5,"sag":4.4,"mdl":2.2,"trb":1.6,"nav":0.7,"pnd":3.0,"dia":9,"cum":3,"par":0,"ss":0,"sr":2,"niv":"Parcial","mch":"exacto"},{"doc":"Rosas Villarubia, Ingrid Yanina","aula":"Taller de Producción de Textos Científicos - A","asig":"Taller de Producción de Textos Científicos","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":7,"asg":7.0,"sag":6.0,"mdl":7.2,"trb":3.7,"nav":3.5,"pnd":3.0,"dia":10,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Rosas, Carolina Vanesa","aula":"Derecho de los Contratos - A","asig":"Derecho de los Contratos","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":7,"asg":6.2,"sag":5.0,"mdl":7.2,"trb":4.1,"nav":3.2,"pnd":2.5,"dia":10,"cum":4,"par":0,"ss":1,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Rossi, Nelson Darío","aula":"Tópicos en Redes - A","asig":"Tópicos en Redes","com":"A","car":"Tecnicatura Universitaria en Diseño y Programación de Videojuegos","uni":"Facultad de Ingeniería, Tecnología y Arquitectura","cat":"","ev":3,"asg":2.0,"sag":2.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":1.0,"dia":0,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Sin dato de Moodle","mch":"docente no está en Moodle"},{"doc":"Ruaimi, Naomi","aula":"Desarrollos en Teoría Psicoanalítica - A","asig":"Desarrollos en Teoría Psicoanalítica","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":7.0,"sag":6.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":4.0,"dia":0,"cum":6,"par":0,"ss":1,"sr":0,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"SCHUNK, Eliana Graciela","aula":"Análisis Matemático - A","asig":"Análisis Matemático","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":8,"asg":7.5,"sag":7.5,"mdl":5.2,"trb":2.9,"nav":2.2,"pnd":4.5,"dia":6,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"SCHUNK, Eliana Graciela","aula":"Estadística - A","asig":"Estadística","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":8,"asg":5.0,"sag":5.0,"mdl":3.0,"trb":1.1,"nav":1.9,"pnd":3.0,"dia":5,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Sakamoto, Guiomar","aula":"Metodología de la Investigación - A","asig":"Metodología de la Investigación","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":5.0,"sag":3.0,"mdl":5.2,"trb":2.8,"nav":2.3,"pnd":2.0,"dia":8,"cum":3,"par":0,"ss":0,"sr":2,"niv":"Cumple","mch":"exacto"},{"doc":"Sarthe, María Teresa","aula":"Intervención Psicopedagógica en Ámbitos I: Educativo y Sociocomunitario - A","asig":"Intervención Psicopedagógica en Ámbitos I: Educativo y Sociocomunitario","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":6.0,"sag":6.0,"mdl":14.6,"trb":5.4,"nav":9.2,"pnd":2.5,"dia":27,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Sarthe, María Teresa","aula":"Intervención Psicopedagógica en Ámbitos II: Salud, Jurídico, Laboral - A","asig":"Intervención Psicopedagógica en Ámbitos II: Salud, Jurídico, Laboral","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":6.0,"sag":5.6,"mdl":14.6,"trb":5.4,"nav":9.2,"pnd":2.5,"dia":27,"cum":4,"par":1,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Sarthe, María Teresa","aula":"PSICOLOGÍA EVOLUTIVA ADOLESCENCIA Y ADULTEZ - A","asig":"PSICOLOGÍA EVOLUTIVA ADOLESCENCIA Y ADULTEZ","com":"A","car":"Licenciatura en Psicopedagogía","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":8,"asg":5.0,"sag":3.0,"mdl":6.1,"trb":2.9,"nav":3.2,"pnd":3.0,"dia":12,"cum":3,"par":0,"ss":0,"sr":2,"niv":"Cumple","mch":"exacto"},{"doc":"Schönfeld, Fátima Soledad","aula":"NEUROCIENCIAS I - C","asig":"NEUROCIENCIAS I","com":"C","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":21.0,"sag":20.6,"mdl":14.5,"trb":9.3,"nav":5.2,"pnd":12.0,"dia":18,"cum":6,"par":1,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Sclepek, Mariana Edith","aula":"Auditoría - A","asig":"Auditoría","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":6.0,"sag":0.0,"mdl":1.1,"trb":0.6,"nav":0.5,"pnd":2.5,"dia":4,"cum":0,"par":0,"ss":0,"sr":5,"niv":"Pendiente","mch":"exacto"},{"doc":"Segovia, Laura Alejandra","aula":"Educación y Políticas Publicas - A","asig":"Educación y Políticas Publicas","com":"A","car":"Profesorado Universitario - Ciclo de Profesorado","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":10,"asg":7.5,"sag":7.5,"mdl":0.1,"trb":0.0,"nav":0.1,"pnd":3.0,"dia":1,"cum":7,"par":0,"ss":0,"sr":0,"niv":"Pendiente","mch":"exacto"},{"doc":"Segovia, Laura Alejandra","aula":"PRÁCTICA III: PRÁCTICA DE LA ENSEÑANZA Y EVALUACIÓN - A","asig":"PRÁCTICA III: PRÁCTICA DE LA ENSEÑANZA Y EVALUACIÓN","com":"A","car":"Profesorado Universitario - Ciclo de Profesorado","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":6.5,"sag":6.4,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":4.5,"dia":0,"cum":6,"par":1,"ss":0,"sr":0,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Silveira, Israel","aula":"Perspectiva Psicológica del Desarrollo Humano - A","asig":"Perspectiva Psicológica del Desarrollo Humano","com":"A","car":"Licenciatura en Ciencias de la Educación - Ciclo de Licenciatura","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":6.5,"sag":5.5,"mdl":7.8,"trb":2.8,"nav":5.0,"pnd":2.5,"dia":13,"cum":4,"par":0,"ss":1,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Slusar , Karla Cecilia Marysol","aula":"Teoría y Derechos Constitucionales - B","asig":"Teoría y Derechos Constitucionales","com":"B","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":11,"asg":11.5,"sag":10.4,"mdl":13.9,"trb":6.8,"nav":7.1,"pnd":4.5,"dia":19,"cum":7,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Sosa, Silvia Raquel","aula":"Contabilidad Básica - A","asig":"Contabilidad Básica","com":"A","car":"Licenciatura en Comercio Internacional","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":3,"asg":4.0,"sag":4.0,"mdl":4.2,"trb":2.2,"nav":2.1,"pnd":2.0,"dia":8,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Szpilard, Ezequiel","aula":"Fundamentos de Filosofía - D","asig":"Fundamentos de Filosofía","com":"D","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":21.0,"sag":21.0,"mdl":12.9,"trb":7.6,"nav":5.3,"pnd":12.0,"dia":16,"cum":7,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Taborda, Maria del Carmen","aula":"Taller de Producción de Textos Científicos - B","asig":"Taller de Producción de Textos Científicos","com":"B","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":7,"asg":11.5,"sag":9.0,"mdl":8.9,"trb":4.2,"nav":4.8,"pnd":4.5,"dia":15,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Tapia, Gaston","aula":"Programación II - A","asig":"Programación II","com":"A","car":"Tecnicatura Universitaria en Diseño y Programación de Videojuegos","uni":"Facultad de Ingeniería, Tecnología y Arquitectura","cat":"","ev":7,"asg":5.0,"sag":5.0,"mdl":5.8,"trb":2.7,"nav":3.1,"pnd":3.5,"dia":9,"cum":4,"par":0,"ss":0,"sr":0,"niv":"Cumple","mch":"exacto"},{"doc":"Tarantini, Eduardo","aula":"Psicología General I - A","asig":"Psicología General I","com":"A","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":12.0,"sag":11.0,"mdl":16.6,"trb":10.0,"nav":6.6,"pnd":5.0,"dia":35,"cum":7,"par":0,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Tarantini, Eduardo","aula":"Psicología General II - B","asig":"Psicología General II","com":"B","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":24.0,"sag":20.9,"mdl":9.2,"trb":6.4,"nav":2.8,"pnd":9.0,"dia":14,"cum":7,"par":0,"ss":1,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Torres, Yanina Esther","aula":"ENTORNOS VIRTUALES DE APRENDIZAJE UNIVERSITARIO I - A","asig":"ENTORNOS VIRTUALES DE APRENDIZAJE UNIVERSITARIO I","com":"A","car":"Profesorado Universitario - Ciclo de Profesorado","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":5.0,"sag":4.0,"mdl":3.9,"trb":1.9,"nav":2.0,"pnd":2.0,"dia":7,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Torres, Yanina Esther","aula":"Transformaciones y Nuevos Paradigmas en Educación Superior - A","asig":"Transformaciones y Nuevos Paradigmas en Educación Superior","com":"A","car":"Profesorado Universitario - Ciclo de Profesorado","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":6.5,"sag":5.0,"mdl":5.3,"trb":2.4,"nav":2.9,"pnd":2.5,"dia":7,"cum":4,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Tortul, María Candela","aula":"Trabajo Integrador Final II - A","asig":"Trabajo Integrador Final II","com":"A","car":"Licenciatura en Psicopedagogía - Ciclo de Licenciatura","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":8,"asg":10.0,"sag":10.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":6.0,"dia":0,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Treco, Raquel Jorgelina","aula":"Historia Económica - A","asig":"Historia Económica","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":6.0,"sag":4.0,"mdl":13.0,"trb":6.2,"nav":6.8,"pnd":2.5,"dia":14,"cum":2,"par":2,"ss":0,"sr":1,"niv":"Cumple","mch":"exacto"},{"doc":"Trevisán, María Belén","aula":"PRÁCTICA III: PRÁCTICA DE LA ENSEÑANZA Y EVALUACIÓN - B","asig":"PRÁCTICA III: PRÁCTICA DE LA ENSEÑANZA Y EVALUACIÓN","com":"B","car":"Profesorado Universitario - Ciclo de Profesorado","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":12.0,"sag":9.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":6.5,"dia":0,"cum":5,"par":0,"ss":1,"sr":1,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Vallejos, Maria Ines","aula":"Fundamentos de Contabilidad - A","asig":"Fundamentos de Contabilidad","com":"A","car":"Licenciatura en Administración de Empresas","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":3,"asg":4.0,"sag":0.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":2.0,"dia":0,"cum":0,"par":0,"ss":0,"sr":2,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Vargas Viola, Ludmila","aula":"Finanzas Públicas - A","asig":"Finanzas Públicas","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":7,"asg":6.0,"sag":4.9,"mdl":5.0,"trb":3.1,"nav":1.9,"pnd":2.5,"dia":9,"cum":4,"par":0,"ss":1,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Vargas Viola, Ludmila","aula":"Microeconomía - A","asig":"Microeconomía","com":"A","car":"Contador Público","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":14,"asg":11.5,"sag":11.0,"mdl":7.0,"trb":4.5,"nav":2.5,"pnd":4.5,"dia":14,"cum":8,"par":2,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Velazquez, Yanina de los Angeles","aula":"Inglés - A","asig":"Inglés","com":"A","car":"Abogacía","uni":"Facultad de Ciencias Jurídicas y Políticas","cat":"","ev":11,"asg":21.0,"sag":18.0,"mdl":17.2,"trb":8.9,"nav":8.3,"pnd":12.0,"dia":13,"cum":6,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Vicari, Pablo Martín","aula":"Fundamentos de Filosofía - C","asig":"Fundamentos de Filosofía","com":"C","car":"Licenciatura en Psicología","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":21.0,"sag":18.0,"mdl":7.6,"trb":4.0,"nav":3.6,"pnd":12.0,"dia":13,"cum":6,"par":0,"ss":0,"sr":1,"niv":"Parcial","mch":"exacto"},{"doc":"Woloszyn, Mabel Graciela","aula":"PRÁCTICA I: OBSERVACIÓN Y ANÁLISIS DE LA PRÁCTICA DE LA ENSEÑANZA - A","asig":"PRÁCTICA I: OBSERVACIÓN Y ANÁLISIS DE LA PRÁCTICA DE LA ENSEÑANZA","com":"A","car":"Profesorado Universitario - Ciclo de Profesorado","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":7,"asg":7.5,"sag":6.0,"mdl":0.0,"trb":0.0,"nav":0.0,"pnd":3.0,"dia":0,"cum":4,"par":0,"ss":1,"sr":0,"niv":"Sin dato de Moodle","mch":"aula no encontrada"},{"doc":"Woloszyn, Mabel Graciela","aula":"Practica Profesional Supervisada. - B","asig":"Practica Profesional Supervisada.","com":"B","car":"Profesorado Universitario - Ciclo de Profesorado","uni":"Facultad de Ciencias Sociales y Humanidades","cat":"","ev":11,"asg":13.5,"sag":10.0,"mdl":8.1,"trb":3.8,"nav":4.3,"pnd":5.0,"dia":8,"cum":6,"par":0,"ss":0,"sr":2,"niv":"Parcial","mch":"exacto"},{"doc":"Yasnikowski, Nicolás del Valle","aula":"Aspectos Legales y Éticos - A","asig":"Aspectos Legales y Éticos","com":"A","car":"Licenciatura en Acompañamiento Terapéutico-Ciclo de Complementación Curricular-","uni":"Facultad de Ciencias de la Salud y Bienestar","cat":"","ev":7,"asg":5.0,"sag":5.0,"mdl":3.8,"trb":1.7,"nav":2.1,"pnd":2.0,"dia":9,"cum":5,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"},{"doc":"Zalesak, Claudia Alejandra","aula":"Introducción al Derecho Civil y Comercial - A","asig":"Introducción al Derecho Civil y Comercial","com":"A","car":"Licenciatura en Comercio Internacional","uni":"Facultad de Ciencias Económicas y Ambientales","cat":"","ev":3,"asg":4.0,"sag":4.0,"mdl":2.8,"trb":1.2,"nav":1.6,"pnd":2.0,"dia":5,"cum":2,"par":0,"ss":0,"sr":0,"niv":"Parcial","mch":"exacto"}]};
+const F = {uni:"", car:"", doc:"", aul:""};
+let ordenDoc = {col:"pct", dir:"asc"}, ordenAul = {col:"pct", dir:"asc"};
+const abiertos = new Set();
+
+const $ = id => document.getElementById(id);
+const n1 = v => (Math.round(v*10)/10).toLocaleString("es-AR",{minimumFractionDigits:1,maximumFractionDigits:1});
+const pc = (a,b) => b > 0 ? Math.round(100*a/b)+"%" : "—";
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const corto = u => u.replace(/^Facultad de /,"");
+const cruza = a => a.mch === "exacto" || a.mch === "aproximado";
+const PILL = {"Cumple":"p-ok","Cumple (solo SAG)":"p-ok","Parcial":"p-pa","Pendiente":"p-de",
+  "Pendiente (solo SAG)":"p-de","En licencia":"p-li","Sin dato de Moodle":"p-sd"};
+
+const vivas = () => D.aulas.filter(a => a.niv !== "En licencia");
+function filtra(salvo){
+  return vivas().filter(a =>
+    (salvo==="uni"||!F.uni||a.uni===F.uni) && (salvo==="car"||!F.car||a.car===F.car) &&
+    (salvo==="doc"||!F.doc||a.doc===F.doc) && (salvo==="aul"||!F.aul||a.aula===F.aul));
+}
+const suma = (l,k) => Math.round(l.reduce((s,a)=>s+(a[k]||0),0)*10)/10;
+
+/* ── filtros encadenados: cada lista muestra solo lo que sobrevive a los otros ── */
+function opciones(){
+  const poner = (id, campo, etiqueta, fn) => {
+    const sel = $(id), previo = F[campo];
+    const vals = [...new Set(filtra(campo).map(fn))].sort((a,b)=>a.localeCompare(b,"es"));
+    sel.innerHTML = `<option value="">${etiqueta} (${vals.length})</option>` +
+      vals.map(v=>`<option value="${esc(v)}"${v===previo?" selected":""}>${esc(fn===corto?v:v)}</option>`).join("");
+    if (previo && !vals.includes(previo)) { F[campo]=""; sel.value=""; }
+  };
+  poner("fUni","uni","Todas", a=>a.uni);
+  poner("fCar","car","Todas", a=>a.car);
+  poner("fDoc","doc","Todos", a=>a.doc);
+  poner("fAul","aul","Todas", a=>a.aula);
+  $("limpiar").disabled = !(F.uni||F.car||F.doc||F.aul);
+}
+
+/* ── kpis con conteo animado ── */
+function anima(el, hasta){
+  const t0 = performance.now(), dur = 650;
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches){ el.textContent = n1(hasta); return; }
+  const paso = t => {
+    const k = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-k,3);
+    el.textContent = n1(hasta*e);
+    if (k < 1) requestAnimationFrame(paso);
+  };
+  requestAnimationFrame(paso);
+}
+function kpis(){
+  const l = filtra();
+  const asg=suma(l,"asg"), sag=suma(l,"sag"), mdl=suma(l,"mdl"), trb=suma(l,"trb"), pnd=suma(l,"pnd");
+  $("kpis").innerHTML = `
+    <div class="kpi asg"><b data-v="${asg}">0</b><span>Horas exigibles</span>
+      <small>SAG · solo eventos ya ocurridos al ${fcorta(D.corte)}</small></div>
+    <div class="kpi sag"><b data-v="${sag}">0</b><span>Cumplidas en SAG · ${pc(sag,asg)}</span>
+      <small>SAG · fichó entrada y salida</small></div>
+    <div class="kpi mdl"><b data-v="${mdl}">0</b><span>Efectivas en Moodle · ${pc(mdl,asg)}</span>
+      <small>Moodle · ${n1(trb)} h de trabajo, el resto navegación</small></div>
+    <div class="kpi pnd"><b data-v="${pnd}">0</b><span>Horas a futuro</span>
+      <small>SAG · eventos programados que todavía no ocurrieron</small></div>`;
+  document.querySelectorAll("#kpis b").forEach(b => anima(b, +b.dataset.v));
+  const n = l.length, d = new Set(l.map(a=>a.doc)).size;
+  $("resumenf").innerHTML = `Mostrando <b>${n}</b> ${n===1?"aula":"aulas"} de <b>${vivas().length}</b>` +
+    ` · <b>${d}</b> ${d===1?"docente":"docentes"}` +
+    (F.uni||F.car||F.doc||F.aul ? "" : " · sin filtros");
+}
+
+function fcorta(iso){ const [,m,d]=iso.split("-"); return d+"/"+m; }
+function flarga(iso){
+  const M=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  const [a,m,d]=iso.split("-").map(Number); return d+" de "+M[m-1];
+}
+
+/* ── barras comparativas ── */
+function barras(cont, grupos){
+  if (!grupos.length){ cont.innerHTML = '<p class="vacio">Sin datos para este filtro.</p>'; return; }
+  const tope = Math.max(...grupos.map(g=>Math.max(g.asg,g.sag,g.mdl))) || 1;
+  cont.innerHTML = grupos.map(g => `
+    <div class="r"><div class="t"><b>${esc(g.nombre)}</b>
+      <em>${g.n} ${g.n===1?"aula":"aulas"} · ${n1(g.asg)} h asignadas</em></div>
+      <div class="trk"><i data-w="${(100*g.sag/tope).toFixed(1)}" style="background:var(--ok)"></i></div>
+      <div class="trk"><i data-w="${(100*g.mdl/tope).toFixed(1)}" style="background:var(--pri)"></i></div>
+      <div class="lbl"><span>SAG ${n1(g.sag)} h · ${pc(g.sag,g.asg)}</span>
+        <span>Moodle ${n1(g.mdl)} h · ${pc(g.mdl,g.asg)}</span></div></div>`).join("");
+  requestAnimationFrame(()=>cont.querySelectorAll(".trk i").forEach(i=>i.style.width=i.dataset.w+"%"));
+}
+function agrupar(l, campo){
+  const g = {};
+  l.forEach(a => {
+    const k = a[campo];
+    g[k] = g[k] || {nombre: campo==="uni"?corto(k):k, n:0, asg:0, sag:0, mdl:0};
+    g[k].n++; g[k].asg+=a.asg; g[k].sag+=a.sag; g[k].mdl+=a.mdl;
+  });
+  return Object.values(g).map(x=>{["asg","sag","mdl"].forEach(k=>x[k]=Math.round(x[k]*10)/10);return x;})
+    .sort((a,b)=>b.asg-a.asg);
+}
+
+/* ── tabla de docentes, con aulas desplegables ── */
+const COLS_DOC = [["doc","Docente",""],["aulas","Aulas","n"],["ev","Eventos","n"],
+  ["asg","Asignadas","n"],["sag","SAG","n"],["mdl","Moodle","n"],["pct","% Moodle","n"],["niv","Estado",""]];
+function tablaDoc(){
+  const l = filtra(), g = {};
+  l.forEach(a => (g[a.doc] = g[a.doc] || []).push(a));
+  let filas = Object.entries(g).map(([doc,as]) => {
+    const r = {doc, as, aulas:as.length, ev:0, asg:0, sag:0, mdl:0};
+    as.forEach(a => {r.ev+=a.ev; r.asg+=a.asg; r.sag+=a.sag; r.mdl+=a.mdl;});
+    ["asg","sag","mdl"].forEach(k=>r[k]=Math.round(r[k]*10)/10);
+    r.sd = as.every(a=>!cruza(a));
+    r.pct = r.sd ? null : (r.asg ? r.mdl/r.asg : 0);
+    const con = as.filter(cruza);
+    r.niv = (con.length?con:as).slice().sort((x,y)=>(x.mdl/(x.asg||1))-(y.mdl/(y.asg||1)))[0].niv;
+    return r;
+  });
+  filas = ordenar(filas, ordenDoc);
+  if (!filas.length){ $("tDoc").innerHTML = '<tbody><tr><td class="vacio">Sin docentes para este filtro.</td></tr></tbody>'; return; }
+  const T = filas.reduce((s,r)=>({aulas:s.aulas+r.aulas,ev:s.ev+r.ev,asg:s.asg+r.asg,sag:s.sag+r.sag,mdl:s.mdl+r.mdl}),
+    {aulas:0,ev:0,asg:0,sag:0,mdl:0});
+  $("tDoc").innerHTML = cabecera(COLS_DOC, ordenDoc, "doc") + "<tbody>" +
+    filas.map(r => {
+      const ab = abiertos.has(r.doc);
+      return `<tr class="doc${ab?" abierto":""}" data-doc="${esc(r.doc)}">
+        <td><span class="flecha">›</span> ${esc(r.doc)}</td>
+        <td class="n">${r.aulas}</td><td class="n">${r.ev}</td><td class="n">${n1(r.asg)}</td>
+        <td class="n">${n1(r.sag)}</td><td class="n">${n1(r.mdl)}</td>
+        <td class="n">${r.sd?"—":pc(r.mdl,r.asg)}</td>
+        <td><span class="pill ${PILL[r.niv]||"p-sd"}">${esc(r.niv)}</span></td></tr>` +
+        r.as.map(a=>`<tr class="sub" data-de="${esc(r.doc)}"${ab?"":" hidden"}>
+          <td style="padding-left:26px">↳ ${esc(a.aula)}</td><td class="n">—</td><td class="n">${a.ev}</td>
+          <td class="n">${n1(a.asg)}</td><td class="n">${n1(a.sag)}</td><td class="n">${n1(a.mdl)}</td>
+          <td class="n">${cruza(a)?pc(a.mdl,a.asg):"—"}</td>
+          <td><span class="pill ${PILL[a.niv]||"p-sd"}">${esc(a.niv)}</span></td></tr>`).join("");
+    }).join("") +
+    `<tr class="tot"><td>Total</td><td class="n">${T.aulas}</td><td class="n">${T.ev}</td>
+      <td class="n">${n1(T.asg)}</td><td class="n">${n1(T.sag)}</td><td class="n">${n1(T.mdl)}</td>
+      <td class="n">${pc(T.mdl,T.asg)}</td><td></td></tr></tbody>`;
+  $("tDoc").querySelectorAll("tr.doc").forEach(tr => tr.onclick = () => {
+    const d = tr.dataset.doc;
+    abiertos.has(d) ? abiertos.delete(d) : abiertos.add(d);
+    tr.classList.toggle("abierto");
+    document.querySelectorAll(`#tDoc tr.sub[data-de="${CSS.escape(d)}"]`).forEach(s=>s.hidden=!abiertos.has(d));
+  });
+}
+
+/* ── tabla de aulas ── */
+const COLS_AUL = [["aula","Aula",""],["doc","Docente",""],["car","Carrera",""],["ev","Eventos","n"],
+  ["asg","Asignadas","n"],["sag","SAG","n"],["mdl","Moodle","n"],["trb","de eso, trabajo","n"],
+  ["dia","Días","n"],["pct","% Moodle","n"],["niv","Estado",""]];
+function tablaAul(){
+  let filas = filtra().map(a => Object.assign({}, a, {pct: cruza(a) ? (a.asg?a.mdl/a.asg:0) : null}));
+  filas = ordenar(filas, ordenAul);
+  if (!filas.length){ $("tAul").innerHTML = '<tbody><tr><td class="vacio">Sin aulas para este filtro.</td></tr></tbody>'; return; }
+  $("tAul").innerHTML = cabecera(COLS_AUL, ordenAul, "aul") + "<tbody>" +
+    filas.map(a => `<tr><td>${esc(a.aula)}</td><td>${esc(a.doc)}</td><td>${esc(a.car)}</td>
+      <td class="n">${a.ev}</td><td class="n">${n1(a.asg)}</td><td class="n">${n1(a.sag)}</td>
+      <td class="n">${n1(a.mdl)}</td><td class="n">${n1(a.trb)}</td><td class="n">${a.dia}</td>
+      <td class="n">${a.pct===null?"—":pc(a.mdl,a.asg)}</td>
+      <td><span class="pill ${PILL[a.niv]||"p-sd"}">${esc(a.niv)}</span></td></tr>`).join("") + "</tbody>";
+}
+
+function cabecera(cols, orden, cual){
+  return "<thead><tr>" + cols.map(([k,t,cl]) =>
+    `<th class="orden ${cl}" data-k="${k}" data-cual="${cual}"${orden.col===k?` data-dir="${orden.dir}"`:""}>${t}</th>`
+  ).join("") + "</tr></thead>";
+}
+function ordenar(filas, orden){
+  const k = orden.col, s = orden.dir === "asc" ? 1 : -1;
+  return filas.sort((a,b) => {
+    let x = a[k], y = b[k];
+    if (x === null) return 1; if (y === null) return -1;   // sin dato, siempre al final
+    if (typeof x === "string") return s * x.localeCompare(y,"es");
+    return s * (x - y);
+  });
+}
+document.addEventListener("click", e => {
+  const th = e.target.closest("th.orden"); if (!th) return;
+  const o = th.dataset.cual === "doc" ? ordenDoc : ordenAul;
+  if (o.col === th.dataset.k) o.dir = o.dir === "asc" ? "desc" : "asc";
+  else { o.col = th.dataset.k; o.dir = (th.dataset.k==="doc"||th.dataset.k==="aula"||th.dataset.k==="car"||th.dataset.k==="niv") ? "asc" : "asc"; }
+  th.dataset.cual === "doc" ? tablaDoc() : tablaAul();
+});
+
+/* ── alertas ── */
+function alertas(){
+  const l = filtra();
+  const mudas = l.filter(a => cruza(a) && a.mdl === 0 && a.asg > 0);
+  const sinCruce = l.filter(a => !cruza(a));
+  const sinSalida = l.filter(a => a.ss > 0);
+  const ausencias = l.filter(a => a.sr > 0);
+  const f = (t,c,d) => c ? `<div class="alerta"><span>${t}<em>${d}</em></span><b>${c}</b></div>` : "";
+  $("alertas").innerHTML =
+    f("Aulas sin ninguna entrada del docente en el campus", mudas.length,
+      "El SAG les asignó horas y Moodle todavía no registra actividad en ese período.") +
+    f("Aulas que no se pudieron cruzar con Moodle", sinCruce.length,
+      "El nombre del aula o del docente no coincide entre los dos sistemas. No dice nada sobre el trabajo hecho.") +
+    f("Aulas con alguna entrada sin salida", sinSalida.length,
+      "El docente entró y no cerró. El SAG no computa esa hora, pero no es ausencia.") +
+    f("Aulas con eventos sin registro de entrada", ausencias.length,
+      "Eventos ya ocurridos que no tienen marca de entrada en el SAG.") ||
+    '<p class="vacio">Nada para revisar con este filtro.</p>';
+}
+
+/* ── descargas ── */
+function csv(nombre, cols, filas){
+  const esc2 = v => `"${String(v==null?"":v).replace(/"/g,'""')}"`;
+  const txt = "﻿" + [cols.map(c=>esc2(c[1])).join(";")]
+    .concat(filas.map(r=>cols.map(c=>esc2(r[c[0]])).join(";"))).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([txt],{type:"text/csv;charset=utf-8"}));
+  a.download = nombre; a.click(); URL.revokeObjectURL(a.href);
+}
+$("bajarAul").onclick = () => csv(`aulas_${D.corte}.csv`,
+  [["aula","Aula"],["doc","Docente"],["car","Carrera"],["uni","Unidad académica"],["ev","Eventos"],
+   ["asg","Horas asignadas SAG"],["sag","Horas cumplidas SAG"],["mdl","Horas Moodle"],
+   ["trb","Horas de trabajo"],["nav","Horas de navegación"],["dia","Días activos"],
+   ["sr","Eventos sin registro de entrada"],["ss","Entradas sin salida"],["niv","Estado"],["mch","Cruce con Moodle"]],
+  filtra());
+$("bajarDoc").onclick = () => {
+  const g = {};
+  filtra().forEach(a => (g[a.doc] = g[a.doc] || []).push(a));
+  const filas = Object.entries(g).map(([doc,as])=>{
+    const r = {doc, uni:as[0].uni, car:as[0].car, aulas:as.length, ev:0, asg:0, sag:0, mdl:0, trb:0};
+    as.forEach(a=>{r.ev+=a.ev;r.asg+=a.asg;r.sag+=a.sag;r.mdl+=a.mdl;r.trb+=a.trb;});
+    ["asg","sag","mdl","trb"].forEach(k=>r[k]=Math.round(r[k]*10)/10);
+    return r;
+  });
+  csv(`docentes_${D.corte}.csv`,
+    [["doc","Docente"],["uni","Unidad académica"],["car","Carrera"],["aulas","Aulas"],["ev","Eventos"],
+     ["asg","Horas asignadas SAG"],["sag","Horas cumplidas SAG"],["mdl","Horas Moodle"],["trb","Horas de trabajo"]],
+    filas);
+};
+
+/* ── tema ── */
+const raiz = document.documentElement;
+function tema(){
+  const oscuro = raiz.dataset.theme === "dark" ||
+    (!raiz.dataset.theme && matchMedia("(prefers-color-scheme:dark)").matches);
+  $("tema").textContent = oscuro ? "Modo claro" : "Modo oscuro";
+}
+$("tema").onclick = () => {
+  const oscuro = raiz.dataset.theme === "dark" ||
+    (!raiz.dataset.theme && matchMedia("(prefers-color-scheme:dark)").matches);
+  raiz.dataset.theme = oscuro ? "light" : "dark";
+  try { localStorage.setItem("tema-sied", raiz.dataset.theme); } catch(e){}
+  tema();
+};
+try { const g = localStorage.getItem("tema-sied"); if (g) raiz.dataset.theme = g; } catch(e){}
+
+/* ── arranque ── */
+function pintar(){
+  opciones(); kpis();
+  barras($("cmpUni"), agrupar(filtra(), "uni"));
+  barras($("cmpCar"), agrupar(filtra(), "car"));
+  tablaDoc(); tablaAul(); alertas();
+}
+["fUni","fCar","fDoc","fAul"].forEach((id,i) => {
+  $(id).onchange = e => { F[["uni","car","doc","aul"][i]] = e.target.value; pintar(); };
+});
+$("limpiar").onclick = () => { F.uni=F.car=F.doc=F.aul=""; abiertos.clear(); pintar(); };
+
+$("sub").textContent = `${D.bimestre} · eventos del ${flarga(D.cobertura.desde)} al ${flarga(D.cobertura.hasta)}` +
+  ` · corte al ${flarga(D.corte)}`;
+$("nota").innerHTML = `<b>Lectura al ${fcorta(D.corte)}.</b> El bimestre está en curso: de las ` +
+  `${n1(D.tot.hs_programadas_total)} horas programadas hasta el cierre del informe, ` +
+  `${n1(D.tot.hs_pendientes)} corresponden a ${D.tot.eventos_pendientes} eventos que todavía no ` +
+  `ocurrieron y quedan fuera del cálculo. Contarlas en contra daría una lectura falsa.`;
+$("fuentes").innerHTML = Object.entries({
+  "Horas exigibles": "SAG — columna A CUMPLIR del Reporte de asistencias docentes SIED, contando solo los eventos cuya fecha ya pasó.",
+  "Cumplidas en SAG": "SAG — columna CUMPLIDO. Solo suma cuando el docente fichó entrada y salida.",
+  "Efectivas en Moodle": "Moodle — registro estándar. Se divide el período en bloques de 5 minutos y se cuenta cada bloque con al menos una acción en esa aula. Un clic suelto cuenta 5 minutos; una pestaña abierta sin actividad no cuenta.",
+  "de eso, trabajo": "La parte de las horas de Moodle en que la acción fue crear, modificar, borrar o calificar. No se descuenta del total: lo abre.",
+  "Horas a futuro": "SAG — horas de eventos programados posteriores a la fecha de corte. Todavía no sucedieron, así que no se cuentan en ninguna dirección.",
+  "Estado": "Cumple, 90 % o más de las horas asignadas registradas en el campus. Parcial, entre 25 % y 90 %. Pendiente, menos del 25 %: son horas que al cierre del período todavía no figuran registradas, no una afirmación sobre el trabajo de la persona. Sin dato de Moodle, el aula no se pudo emparejar entre los dos sistemas: el 0 no significa que no trabajó, significa que no lo sabemos."
+}).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("");
+$("pie").textContent = `Datos procesados el ${D.generado.slice(0,10).split("-").reverse().join("/")}. ` +
+  `Departamento Pedagógico SIED · Universidad de la Cuenca del Plata.`;
+
+addEventListener("scroll", () => $("filtros").classList.toggle("pegado", scrollY > 70), {passive:true});
+tema(); pintar();
+</script>
+</body></html>
